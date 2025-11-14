@@ -70,7 +70,7 @@ def check_validity(username: str, password: str) -> None:
     valid_username = True
     valid_password = True
 
-    with open('login_data.csv', 'r') as login_data:
+    with open('login_professor.csv', 'r') as login_data:
         for row in csv.reader(login_data):
             if row[0] == username:
                 messagebox.showwarning("Username already exists", "Username already exists, please select a different username.")
@@ -92,7 +92,7 @@ Password must Contain at least one special character""")
 
     if valid_username == True and valid_password == True:
         try:
-            with open('login_data.csv', 'a') as login_data: #storing username and password
+            with open('../Users/login_professor.csv', 'a') as login_data: #storing username and password
                 csv.writer(login_data).writerow([username, password]) #In a real world application, I would hash the passwords and store them in a secure environment
         except Exception as e:
             print("Error:",e)
@@ -129,7 +129,7 @@ def login() -> None:
 
 
 def check_login(username,password) -> None:
-    with open('login_data.csv', 'r') as login_data:
+    with open('../Users/login_professor.csv', 'r') as login_data:
         valid = False
         for row in csv.reader(login_data):
             if row[0] == username and row[1] == password:
