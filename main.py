@@ -1,1 +1,1 @@
-import intialise
+from initi
