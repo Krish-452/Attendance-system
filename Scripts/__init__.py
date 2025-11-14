@@ -1,3 +1,3 @@
 from datetime import datetime
 
-print(f"{datetime}: running a script")
+print(f"{datetime.now()}: running a script")

@@ -2,8 +2,21 @@ import csv
 import tkinter as tk
 from tkinter import messagebox
 
+def gui() -> None:
+    global root, canvas
+    root = tk.Tk()
+    root.geometry("600x600")
+    root.configure(bg='#72BF6A')
+    root.title("Welcome")
+    root.resizable(False, False)
 
+    header = tk.Label(root, text="XYZ Solutions", font=("Arial", 30, 'bold'), bg='#72BF6A', fg='white')
+    header.pack()
 
+    canvas = tk.Canvas(root, width=600, height=600, bg='#8BFF84', highlightthickness=0)
+    canvas.pack()
+    homepage()
+    root.mainloop()
 
 def add_placeholder(entry, placeholder, color='grey'):
     def on_focus_in(event):
@@ -29,14 +42,19 @@ def homepage() -> None:
     canvas.create_rectangle(150, 70, 450, 470, fill='white')
     canvas.create_rectangle(150, 70, 450, 150, fill='#72BF6A')
 
-    login_button = tk.Button(root, text="Login", font=("Arial", 14, "bold"), bg='#46923C', fg='white', borderwidth=0,
-                       activebackground='#276221', activeforeground='white', width=18, height=2, command=login)
-    create_account_button = tk.Button(root, text="Create Account", font=("Arial", 14, "bold"), bg='#46923C', fg='white', borderwidth=0,
-                       activebackground='#276221', activeforeground='white', width=18, height=2, command=create_account)
+    login_prof = tk.Button(root, text="Login as Professor", font=("Arial", 14, "bold"), bg='#46923C', fg='white', borderwidth=0,
+                       activebackground='#276221', activeforeground='white', width=18, height=2, command=lambda: login("prof"))
+    login_TA = tk.Button(root, text="Login as TA", font=("Arial", 14, "bold"), bg='#46923C', fg='white', borderwidth=0,
+                             activebackground='#276221', activeforeground='white', width=18, height=2, command=lambda: login("TA"))
+    login_admin = tk.Button(root, text="Login as Admin", font=("Arial", 14, "bold"), bg='#46923C', fg='white', borderwidth=0,
+                       activebackground='#276221', activeforeground='white', width=18, height=2, command=lambda: login("admin"))
+    quit_button = tk.Button(canvas, text="Quit", font=("Arial", 12), bg="#72BF6A", fg="white", borderwidth=0, command=lambda: quit())
 
     canvas.create_text(300, 110, text="Welcome", font=("Arial", 20, 'bold'))
-    canvas.create_window(300, 250, window=login_button)
-    canvas.create_window(300, 360, window=create_account_button)
+    canvas.create_window(300, 210, window=login_prof)
+    canvas.create_window(300, 290, window=login_TA)
+    canvas.create_window(300, 370, window=login_admin)
+    canvas.create_window(300, 440, window=quit_button)
 
 
 def create_account() -> None:
@@ -102,7 +120,7 @@ Password must Contain at least one special character""")
             login()
 
 
-def login() -> None:
+def login(user) -> None:
     canvas.delete("all")
 
     canvas.create_rectangle(150, 70, 450, 470, fill='white')
@@ -114,7 +132,7 @@ def login() -> None:
 
     login_button = tk.Button(canvas, text="Login", font=("Arial", 14, "bold"),
                              bg='#46923C', fg='white', borderwidth=0, width=18, height=2,
-                             command=lambda: check_login(user_name.get(),password.get()))
+                             command=lambda: check_login(user_name.get(),password.get(),user))
 
     user_name = tk.Entry(canvas, width=12, font=("Arial", 20, "bold"), bg='#ACD8A7')
     add_placeholder(user_name, "👤 Username")
@@ -128,8 +146,15 @@ def login() -> None:
     canvas.create_window(300, 360, window=login_button)
 
 
-def check_login(username,password) -> None:
-    with open('../Users/login_professor.csv', 'r') as login_data:
+def check_login(username,password,user) -> None:
+    if user == "prof":
+        file_path = "../Users/login_professor.csv"
+    elif user == "TA":
+        file_path = "../Users/login_TA.csv"
+    else:
+        file_path = "../Users/login_admin.csv"
+
+    with open(file_path, 'r') as login_data:
         valid = False
         for row in csv.reader(login_data):
             if row[0] == username and row[1] == password:
@@ -159,21 +184,7 @@ def logged_in(username) -> None:
     canvas.create_window(300, 430, window=quit_button)
     canvas.create_text(300, 110, text="Company Page", font=("Arial", 20, 'bold'))
 
-def gui() -> None:
-    global root, canvas
-    root = tk.Tk()
-    root.geometry("600x600")
-    root.configure(bg='#72BF6A')
-    root.title("Welcome")
-    root.resizable(False, False)
 
-    header = tk.Label(root, text="XYZ Solutions", font=("Arial", 30, 'bold'), bg='#72BF6A', fg='white')
-    header.pack()
-
-    canvas = tk.Canvas(root, width=600, height=600, bg='#8BFF84', highlightthickness=0)
-    canvas.pack()
-    homepage()
-    root.mainloop()
 
 if __name__ == "__main__":
     gui()
