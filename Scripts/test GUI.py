@@ -131,6 +131,7 @@ class HomePage(StyledCanvasFrame):
         self.create_button_window(440, quit_button) #X value is the center of the frame, so no need to define it
 
 class LoginPage(StyledCanvasFrame):
+    """Integrate show login page, set login type into login page itself"""
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self._user_type: Optional[str] = None
@@ -164,16 +165,11 @@ class LoginPage(StyledCanvasFrame):
         password = self.password_entry.get()
         user_type = self._user_type or "prof"
 
-        try:
-            result = account_manager.login(username, password, user_type)
-        except Exception as err:
-            # if account_manager raises or does not return, handle gracefully
-            messagebox.showerror("Login Error", f"Login failed: {err}")
-            return
+        """Clear username and password field after logging in or when pressing back button(Security risk)"""
 
-        # If account_manager returns a truthy value, navigate. If it returns None, assume it handled messages itself.
-        if result:
+        if account_manager.login(username, password, user_type):
             self.controller.on_login_success(username, user_type)
+            messagebox.showinfo("Login Successful", "You have logged in Successfully")
         else:
             messagebox.showerror("Login Failed", "Invalid Username or Password")
 
@@ -182,6 +178,8 @@ class CreateAccountPage(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self.place_title("Create Account")
+
+        """Add radio button to select if they want to create a professor account or TA account. also add a label warning if the field is not selected (unpack and pack label)"""
 
         self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
         add_placeholder(self.username_entry, "👤 Username")
@@ -199,32 +197,24 @@ class CreateAccountPage(StyledCanvasFrame):
         self.create_button_window(360, self.create_button)
         self.create_button_window(430, self.back_button)
 
+
     def _attempt_create(self) -> None:
         username = self.username_entry.get()
         password = self.password_entry.get()
-        try:
-            result = account_manager.create_account(username, password)
-        except Exception as ex:
-            messagebox.showerror("Account Error", f"Could not create account: {ex}")
-            return
 
-        if result is True:
-            messagebox.showinfo("Account created", "Account created successfully. Please login.")
-            self.controller.show_frame("LoginPage")
-        elif result is False:
-            # create_account is expected to show its own message if it fails, but handle fallback
-            messagebox.showwarning("Create failed", "Account not created. Check inputs.")
+        if account_manager.create_account(username, password):
+            messagebox.showinfo("Account created", "Account created successfully.")
+            self.controller.show_frame("AdminDashboard")
         else:
-            # fallback if create_account didn't return bool
-            if getattr(account_manager, "_last_create_success", False):
-                messagebox.showinfo("Account created", "Account created successfully. Please login.")
-                self.controller.show_frame("LoginPage")
+            messagebox.showwarning("Account Creation failed", "Account could not be created, please try again.")
 
 
 class AdminDashboard(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self.place_title("Admin Dashboard")
+
+        """Add Delete account option"""
 
         create_account_btn = tk.Button(self, text="Create Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
                                        borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
