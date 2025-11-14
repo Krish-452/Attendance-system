@@ -1,7 +1,7 @@
-import subprocess
-import sys
-
 def install_requirements(file="requirements.txt"):
+    import subprocess
+    import sys
+
     try:
         print(f"Installing packages from {file}...\n")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", file])
