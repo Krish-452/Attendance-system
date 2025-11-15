@@ -1,17 +1,23 @@
 import csv
 from tkinter import messagebox
 
+
+def file_path(user_type) -> str:
+    if user_type == "admin":
+        file_path_of_user = "../Users/login_admin.csv"
+    elif user_type == "prof":
+        file_path_of_user = "../Users/login_professor.csv"
+    else:
+        file_path_of_user = "../Users/login_TA.csv"
+    return file_path_of_user
+
+
 def create_account(username: str, password: str, user) -> bool:
     special_chars: set = set("!@#$%^&*()-_=+[]{}|;:'\",.<>?/~`")
     valid_username = True
     valid_password = True
 
-    if user == "prof":
-        file_path = '../Users/login_professor.csv'
-    else:
-        file_path = '../Users/login_TA.csv'
-
-    with open(file_path, 'r') as login_data:
+    with open(file_path(user), 'r') as login_data:
         for row in csv.reader(login_data):
             if row[0] == username:
                 messagebox.showwarning("Username already exists", "Username already exists, please select a different username.")
@@ -33,7 +39,7 @@ Password must Contain at least one special character""")
 
     if valid_username == True and valid_password == True:
         try:
-            with open(file_path, 'a') as login_data: #storing username and password
+            with open(file_path(user), 'a') as login_data: #storing username and password
                 csv.writer(login_data).writerow([username, password])
                 """Hash password before saving"""
                 return True
@@ -43,15 +49,17 @@ Password must Contain at least one special character""")
 
 
 def login(username: str,password: str,user: str) -> bool:
-    if user == "prof":
-        file_path = "../Users/login_professor.csv"
-    elif user == "TA":
-        file_path = "../Users/login_TA.csv"
-    else:
-        file_path = "../Users/login_admin.csv"
-
-    with open(file_path, 'r') as login_data:
+    with open(file_path(user), 'r') as login_data:
         for row in csv.reader(login_data):
             if row[0] == username and row[1] == password:
                 return True
         return False
+
+def retrieve_accounts(user:str) -> list:
+    with open(file_path(user), 'r') as login_data:
+        return [row[0] for row in csv.reader(login_data)]
+
+
+"""test_users = input("Enter user: ")
+print(file_path(test_users))
+print(retrieve_accounts(test_users))"""
