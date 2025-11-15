@@ -56,6 +56,7 @@ class App(tk.Tk):
             HomePage,
             LoginPage,
             CreateAccountPage,
+            DeleteAccountPage,
             AdminDashboard,
             ProfessorDashboard,
             TADashboard,
@@ -175,8 +176,6 @@ class LoginPage(StyledCanvasFrame):
         password = self.password_entry.get()
         user_type = self._user_type or "prof"
 
-        """Clear username and password field after logging in or when pressing back button(Security risk)"""
-
         if account_manager.login(username, password, user_type):
             self.controller.on_login_success(username, user_type)
             messagebox.showinfo("Login Successful", "You have logged in Successfully")
@@ -190,8 +189,6 @@ class CreateAccountPage(StyledCanvasFrame):
         super().__init__(parent, controller)
         self.place_title("Create Account")
 
-        """Add radio button to select if they want to create a professor account or TA account. also add a label warning if the field is not selected (unpack and pack label)"""
-
         self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
         add_placeholder(self.username_entry, "👤 Username")
         self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
@@ -199,10 +196,10 @@ class CreateAccountPage(StyledCanvasFrame):
 
         self.create_prof_acc = tk.Button(self, text="For Prof.", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
                                        borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                       width=10, height=2, command=lambda: self._attempt_create("prof"))
+                                       width=10, height=2, command=lambda: self.attempt_create("prof"))
         self.create_TA_acc = tk.Button(self, text="For TA", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
                                        borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                       width=10, height=2, command=lambda: self._attempt_create("TA"))
+                                       width=10, height=2, command=lambda: self.attempt_create("TA"))
         self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                      command=lambda: self.back())
 
@@ -226,7 +223,7 @@ class CreateAccountPage(StyledCanvasFrame):
         self.controller.show_frame("AdminDashboard")
 
 
-    def _attempt_create(self, account_type: str) -> None:
+    def attempt_create(self, account_type: str) -> None:
         username: str = self.username_entry.get()
         password: str = self.password_entry.get()
 
@@ -238,30 +235,74 @@ class CreateAccountPage(StyledCanvasFrame):
             messagebox.showwarning("Account Creation failed", "Account could not be created, please try again.")
 
 
+class DeleteAccountPage(StyledCanvasFrame):
+    def __init__(self, parent: tk.Widget, controller: App) -> None:
+        super().__init__(parent, controller)
+        self.place_title("Delete Account")
+
+        """self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        add_placeholder(self.username_entry, "👤 Username")
+        self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        add_placeholder(self.password_entry, "🔑 Password")
+
+        self.create_prof_acc = tk.Button(self, text="For Prof.", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       width=10, height=2, command=lambda: self._attempt_create("prof"))
+        self.create_TA_acc = tk.Button(self, text="For TA", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       width=10, height=2, command=lambda: self._attempt_create("TA"))"""
+        self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
+                                     command=lambda: self.controller.show_frame("AdminDashboard"))
+
+        #self.canvas.create_window(300,210, window=self.username_entry)
+        #self.canvas.create_window(300,270, window=self.password_entry)
+        #self.canvas.create_window(230,360, window=self.create_prof_acc)
+        #self.canvas.create_window(370,360, window=self.create_TA_acc)
+        self.canvas.create_window(300,430, window=self.back_button)
+
+
 class AdminDashboard(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self.place_title("Admin Dashboard")
 
-        """Add Delete account option"""
-
         create_account_btn = tk.Button(self, text="Create Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
                                        borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
                                        width=18, height=2, command=lambda: controller.show_frame("CreateAccountPage"))
+        delete_account_btn = tk.Button(self, text="Delete Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       width=18, height=2, command=lambda: controller.show_frame("DeleteAccountPage"))
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
 
-        self.canvas.create_window(300,300, window=create_account_btn)
-        self.canvas.create_window(300,360, window=logout_btn)
+        self.canvas.create_window(300,240, window=create_account_btn)
+        self.canvas.create_window(300,340, window=delete_account_btn)
+        self.canvas.create_window(300,430, window=logout_btn)
 
 class ProfessorDashboard(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self.place_title("Professor Dashboard")
 
+        self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        add_placeholder(self.username_entry, "👤 Username")
+        self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        add_placeholder(self.password_entry, "🔑 Password")
+
+        self.my_class_btn = tk.Button(self, text="My classes", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                         borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                         width=10, height=2, command=lambda: self._attempt_create("prof"))
+        self.add_class_btn = tk.Button(self, text="Add Class", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       width=10, height=2, command=lambda: self._attempt_create("TA"))
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
-        self.canvas.create_window(300,300, window=logout_btn)
+
+        self.canvas.create_window(300, 210, window=self.username_entry)
+        self.canvas.create_window(300, 270, window=self.password_entry)
+        self.canvas.create_window(230, 360, window=self.my_class_btn)
+        self.canvas.create_window(370, 360, window=self.add_class_btn)
+        self.canvas.create_window(300,430, window=logout_btn)
 
 class TADashboard(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
@@ -270,7 +311,8 @@ class TADashboard(StyledCanvasFrame):
 
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
-        self.canvas.create_window(300,300, window=logout_btn)
+
+        self.canvas.create_window(300,430, window=logout_btn)
 
 if __name__ == "__main__":
     app = App()
