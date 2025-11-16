@@ -288,8 +288,12 @@ class DeleteAccountPage(StyledCanvasFrame):
 
         if not selection:
             messagebox.showwarning("Warning", "No account selected.")
-
-
+        else:
+            if account_manager.delete_account(selection[0], self.account_type.get().strip()):
+                messagebox.showinfo("Account deleted", "Account deleted successfully.")
+            else:
+                messagebox.showwarning("Warning", "Account could not be deleted, please try again.")
+            self.show_accounts()
 
 
 class AdminDashboard(StyledCanvasFrame):
