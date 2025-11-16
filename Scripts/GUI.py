@@ -1,7 +1,8 @@
 from typing import Dict, Optional
 import tkinter as tk
-from tkinter import messagebox, Listbox
+from tkinter import messagebox
 import Utils.account_manager as account_manager
+import Utils.class_manager as class_manager
 
 #Declaring colours and fonts for multiple uses
 BG_ROOT = "#72BF6A"
@@ -344,10 +345,53 @@ class TADashboard(StyledCanvasFrame):
         super().__init__(parent, controller)
         self.place_title("TA Dashboard")
 
+        self.class_list_frame = None  # Pre-declaring the list so we don't get any error while trying to delete the old list in show accounts
+        self.class_list = None  # Not necessary but makes the program more reliable
+
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
+        self.start_button = tk.Button(self, text="Delete", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
+                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       width=18, height=2, command=self.attempt_delete)
 
         self.canvas.create_window(300,430, window=logout_btn)
+        self.canvas.create_window(300, 370, window=self.start_button)
+
+
+    def show_classes(self) -> None:
+        users = account_manager.retrieve_accounts(self.account_type.get().strip())
+
+        if self.user_list_frame:
+            self.user_list_frame.destroy()  # Destroy any previously loaded list
+
+        self.user_list_frame = tk.Frame(self, bg='white')  # creating a frame to hold both list and scroll bar
+
+        scrollbar = tk.Scrollbar(self.user_list_frame, orient="vertical")
+        self.user_list = tk.Listbox(self.user_list_frame, width=17, height=5, font=("Arial", 12, "bold"),
+                                    yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.user_list.yview)
+
+        scrollbar.pack(side="right", fill="y")
+        self.user_list.pack(side="left", fill="both", expand=True)
+
+        for i, user in enumerate(users, start=1):  # Enumerate to create a numbered list (looks better)
+            self.user_list.insert(tk.END, f"{i}. {user}")
+
+        # Place the entire frame on canvas
+        self.canvas.create_window(300, 260, window=self.user_list_frame)
+
+    def attempt_delete(self) -> None:
+        selection = self.user_list.curselection()
+
+        if not selection:
+            messagebox.showwarning("Warning", "No account selected.")
+        else:
+            if account_manager.delete_account(selection[0], self.account_type.get().strip()):
+                messagebox.showinfo("Account deleted", "Account deleted successfully.")
+            else:
+                messagebox.showwarning("Warning", "Account could not be deleted, please try again.")
+            self.show_accounts()
+
 
 if __name__ == "__main__":
     app = App()
