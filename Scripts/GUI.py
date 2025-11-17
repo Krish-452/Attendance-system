@@ -6,17 +6,17 @@ import Utils.class_manager as class_manager
 from Utils.helpers import add_placeholder as ghost_text
 
 # Declaring colours and fonts for multiple uses
-BG_ROOT = "#72BF6A"
-CANVAS_BG = "#8BFF84"
-PANEL_FILL = "white"
-PANEL_HEADER = "#72BF6A"
-BUTTON_BG = "#46923C"
-BUTTON_ACTIVE = "#276221"
-ENTRY_BG = "#ACD8A7"
-FONT_HEADER = ("Arial", 20, "bold")
-FONT_TITLE = ("Arial", 30, "bold")
-FONT_BUTTON = ("Arial", 14, "bold")
-FONT_SMALL = ("Arial", 12)
+BG_ROOT = '#870903'
+CANVAS_BG = '#F9DD9C'#F2D7D5
+PANEL_FILL = '#F2D7D5'#F9DD9C
+PANEL_HEADER = '#E90C00'
+BUTTON_BG = '#E90C00'
+BUTTON_ACTIVE = '#870903'
+ENTRY_BG = 'dark grey'
+FONT_HEADER = ("Zain", 30, "bold")
+FONT_TITLE = ("Zain", 40, "bold")
+FONT_BUTTON = ("Lexend", 14, "bold")
+FONT_SMALL = ("Lexend", 12)
 
 
 # Defining the main app as a class
@@ -24,9 +24,12 @@ class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("Attendance System")
-        self.geometry("600x600")
+        self.geometry("1024x720")
         self.configure(bg=BG_ROOT)
         self.resizable(False, False)
+
+        header = tk.Label(self, text="Attendance System", font=FONT_TITLE, bg=BG_ROOT, fg="white")
+        header.pack(pady=(10, 10))
 
         # container for pages
         container = tk.Frame(self, bg=BG_ROOT)
@@ -50,9 +53,6 @@ class App(tk.Tk):
             frame = P(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
-        header = tk.Label(self, text="Attendance System", font=FONT_TITLE, bg=BG_ROOT, fg="white")
-        header.pack(pady=(0, 10))
 
         self.show_frame("HomePage")  # Starting on the HomePage
 
@@ -78,6 +78,8 @@ class App(tk.Tk):
             self.show_frame("ClassesPage")
 
 
+
+
 # We used a canvas styled on a frame
 # Canvas allows better customization
 # While the frame allows for seamless transitions
@@ -85,13 +87,14 @@ class StyledCanvasFrame(tk.Frame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, bg=BG_ROOT)
         self.controller = controller
-        self.canvas = tk.Canvas(self, width=600, height=520, bg=CANVAS_BG, highlightthickness=0)
+        self.canvas = tk.Canvas(self, width=1024, height=660, bg=CANVAS_BG, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
-        self.canvas.create_rectangle(150, 70, 450, 470, fill=PANEL_FILL, outline="")
-        self.canvas.create_rectangle(150, 70, 450, 150, fill=PANEL_HEADER, outline="")
+        self.canvas.create_rectangle(150, 70, 874, 560, fill=PANEL_FILL, outline="")
+        self.canvas.create_rectangle(150, 70, 874, 150, fill=PANEL_HEADER, outline="")
 
     def place_title(self, text: str) -> None:
-        self.canvas.create_text(300, 110, text=text, font=FONT_HEADER)
+        title = tk.Label(self,text=text, font=FONT_HEADER,fg='white',bg=PANEL_HEADER, width=20)
+        self.canvas.create_window(512, 110, window=title)
 
 
 class HomePage(StyledCanvasFrame):
@@ -100,44 +103,43 @@ class HomePage(StyledCanvasFrame):
         self.place_title("Welcome")
 
         login_prof = tk.Button(self, text="Login as Professor", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                               borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                               borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                width=18, height=2, command=lambda: controller.show_login_for("prof"))
         login_TA = tk.Button(self, text="Login as TA", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                             borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                             borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                              width=18, height=2, command=lambda: controller.show_login_for("TA"))
         login_admin = tk.Button(self, text="Login as Admin", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                 width=18, height=2, command=lambda: controller.show_login_for("admin"))
         quit_button = tk.Button(self, text="Quit", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                 command=self.controller.quit)
 
-        self.canvas.create_window(300, 210, window=login_prof)
-        self.canvas.create_window(300, 290, window=login_TA)
-        self.canvas.create_window(300, 370, window=login_admin)
-        self.canvas.create_window(300, 430, window=quit_button)
+        self.canvas.create_window(512, 240, window=login_prof)
+        self.canvas.create_window(512, 340, window=login_TA)
+        self.canvas.create_window(512, 440, window=login_admin)
+        self.canvas.create_window(512, 520, window=quit_button)
 
 
 class LoginPage(StyledCanvasFrame):
     def __init__(self, parent: tk.Widget, controller: App) -> None:
         super().__init__(parent, controller)
         self._user_type: Optional[str] = None
-        self.place_title("Login")
 
-        self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        self.username_entry = tk.Entry(self, width=22, font=("Arial", 18, "bold"), bg=ENTRY_BG)
         ghost_text(self.username_entry, "👤 Username")
-        self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
+        self.password_entry = tk.Entry(self, width=22, font=("Arial", 18, "bold"), bg=ENTRY_BG)
         ghost_text(self.password_entry, "🔑 Password")
 
         self.login_button = tk.Button(self, text="Login", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                      borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                      borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                       width=18, height=2, command=self.attempt_login)
         self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                      command=lambda: self.back())
 
-        self.canvas.create_window(300, 210, window=self.username_entry)
-        self.canvas.create_window(300, 270, window=self.password_entry)
-        self.canvas.create_window(300, 360, window=self.login_button)
-        self.canvas.create_window(300, 430, window=self.back_button)
+        self.canvas.create_window(512, 260, window=self.username_entry)
+        self.canvas.create_window(512, 320, window=self.password_entry)
+        self.canvas.create_window(512, 440, window=self.login_button)
+        self.canvas.create_window(512, 520, window=self.back_button)
 
     def clear_fields(self):
         self.username_entry.delete(0, tk.END)
@@ -155,7 +157,7 @@ class LoginPage(StyledCanvasFrame):
 
         display = {"prof": "Login (Professor)", "TA": "Login (TA)", "admin": "Login (Admin)"}
         self.canvas.create_rectangle(150, 70, 450, 150, fill=PANEL_HEADER, outline="")
-        self.canvas.create_text(300, 110, text=display.get(user_type, "Login"), font=FONT_HEADER)
+        self.place_title(display.get(self._user_type, "Login"))
 
     def attempt_login(self) -> None:
         username = self.username_entry.get()
@@ -181,19 +183,19 @@ class CreateAccountPage(StyledCanvasFrame):
         ghost_text(self.password_entry, "🔑 Password")
 
         self.create_prof_acc = tk.Button(self, text="For Prof.", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                         borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                         width=10, height=2, command=lambda: self.attempt_create("prof"))
+                                         borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
+                                         width=18, height=2, command=lambda: self.attempt_create("prof"))
         self.create_TA_acc = tk.Button(self, text="For TA", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                       width=10, height=2, command=lambda: self.attempt_create("TA"))
+                                       borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
+                                       width=18, height=2, command=lambda: self.attempt_create("TA"))
         self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                      command=lambda: self.back())
 
-        self.canvas.create_window(300, 210, window=self.username_entry)
-        self.canvas.create_window(300, 270, window=self.password_entry)
-        self.canvas.create_window(230, 360, window=self.create_prof_acc)
-        self.canvas.create_window(370, 360, window=self.create_TA_acc)
-        self.canvas.create_window(300, 430, window=self.back_button)
+        self.canvas.create_window(512, 260, window=self.username_entry)
+        self.canvas.create_window(512, 320, window=self.password_entry)
+        self.canvas.create_window(362, 440, window=self.create_prof_acc)
+        self.canvas.create_window(662, 440, window=self.create_TA_acc)
+        self.canvas.create_window(512, 520, window=self.back_button)
 
     def clear_fields(self):
         self.username_entry.delete(0, tk.END)
@@ -229,20 +231,20 @@ class DeleteAccountPage(StyledCanvasFrame):
         self.user_list_frame = None  # Pre-declaring the list so we don't get any error while trying to delete the old list in show accounts
         self.user_list = None  # Not necessary but makes the program more reliable
 
-        self.select_prof = tk.Radiobutton(self, text="Professor", font=FONT_BUTTON, bg='white', value="prof",
+        self.select_prof = tk.Radiobutton(self, text="Professor", font=FONT_BUTTON, bg=PANEL_FILL, value="prof",
                                           variable=self.account_type, command=self.show_accounts)
-        self.select_TA = tk.Radiobutton(self, text="TA", font=FONT_BUTTON, bg='white', value="TA",
+        self.select_TA = tk.Radiobutton(self, text="TA", font=FONT_BUTTON, bg=PANEL_FILL, value="TA",
                                         variable=self.account_type, command=self.show_accounts)
         self.delete_button = tk.Button(self, text="Delete", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                        width=18, height=2, command=self.attempt_delete)
         self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                      command=lambda: self.controller.show_frame("AdminDashboard"))
 
-        self.canvas.create_window(300, 370, window=self.delete_button)
-        self.canvas.create_window(250, 180, window=self.select_prof)
-        self.canvas.create_window(380, 180, window=self.select_TA)
-        self.canvas.create_window(300, 430, window=self.back_button)
+        self.canvas.create_window(512, 440, window=self.delete_button)
+        self.canvas.create_window(362, 180, window=self.select_prof)
+        self.canvas.create_window(662, 180, window=self.select_TA)
+        self.canvas.create_window(512, 520, window=self.back_button)
 
     def show_accounts(self) -> None:
         users = account_manager.retrieve_accounts(self.account_type.get().strip())
@@ -253,7 +255,7 @@ class DeleteAccountPage(StyledCanvasFrame):
         self.user_list_frame = tk.Frame(self, bg='white')  # creating a frame to hold both list and scroll bar
 
         scrollbar = tk.Scrollbar(self.user_list_frame, orient="vertical")
-        self.user_list = tk.Listbox(self.user_list_frame, width=17, height=5, font=("Arial", 12, "bold"),
+        self.user_list = tk.Listbox(self.user_list_frame, width=45, height=7, font=("Arial", 14, "bold"), bg='dark grey', fg='black',
                                     yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.user_list.yview)
 
@@ -264,7 +266,7 @@ class DeleteAccountPage(StyledCanvasFrame):
             self.user_list.insert(tk.END, f"{i}. {user}")
 
         # Place the entire frame on canvas
-        self.canvas.create_window(300, 260, window=self.user_list_frame)
+        self.canvas.create_window(512, 300, window=self.user_list_frame)
 
     def attempt_delete(self) -> None:
         selection = self.user_list.curselection()
@@ -285,17 +287,17 @@ class AdminDashboard(StyledCanvasFrame):
         self.place_title("Admin Dashboard")
 
         create_account_btn = tk.Button(self, text="Create Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                        width=18, height=2, command=lambda: controller.show_frame("CreateAccountPage"))
         delete_account_btn = tk.Button(self, text="Delete Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                       borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white", relief="raised",
                                        width=18, height=2, command=lambda: controller.show_frame("DeleteAccountPage"))
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
 
-        self.canvas.create_window(300, 240, window=create_account_btn)
-        self.canvas.create_window(300, 340, window=delete_account_btn)
-        self.canvas.create_window(300, 430, window=logout_btn)
+        self.canvas.create_window(512, 260, window=create_account_btn)
+        self.canvas.create_window(512, 400, window=delete_account_btn)
+        self.canvas.create_window(512, 520, window=logout_btn)
 
 
 class ClassesPage(StyledCanvasFrame):
@@ -309,17 +311,17 @@ class ClassesPage(StyledCanvasFrame):
         logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
                                command=lambda: controller.show_frame("HomePage"))
         self.start_button = tk.Button(self, text="View", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                      borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
+                                      borderwidth=4, activebackground=BUTTON_ACTIVE, activeforeground="white",  relief="raised",
                                       width=18, height=2, command=lambda: self.show_classes())
 
-        self.canvas.create_window(300, 430, window=logout_btn)
-        self.canvas.create_window(300, 370, window=self.start_button)
+        self.canvas.create_window(512, 520, window=logout_btn)
+        self.canvas.create_window(512, 450, window=self.start_button)
 
     def on_show(self): #Refreshes the list everytime the frame gets loaded
         self.show_classes()
 
     def show_classes(self) -> None: #Almost the same as show accounts in DeleteAccountPage
-        classes = list((list(value.values())[0: 2] for value in class_manager.retrieve_classes(self.controller.current_username, self.controller.current_user_type)))
+        classes = list((list(value.values()) for value in class_manager.retrieve_classes(self.controller.current_username, self.controller.current_user_type)))
 
         if self.class_list_frame:
             self.class_list_frame.destroy()  # Destroy any previously loaded list
@@ -327,7 +329,7 @@ class ClassesPage(StyledCanvasFrame):
         self.class_list_frame = tk.Frame(self, bg='white')  # creating a frame to hold both list and scroll bar
 
         scrollbar = tk.Scrollbar(self.class_list_frame, orient="vertical")
-        self.class_list = tk.Listbox(self.class_list_frame, width=25, height=7, font=("Arial", 12, "bold"),
+        self.class_list = tk.Listbox(self.class_list_frame, width=45, height=8, font=("Arial", 14, "bold"), bg='dark grey', fg='black',
                                     yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.class_list.yview)
 
@@ -335,10 +337,10 @@ class ClassesPage(StyledCanvasFrame):
         self.class_list.pack(side="left", fill="both", expand=True)
 
         for i in range(len(classes)):
-            self.class_list.insert(tk.END, f"{classes[i][0]}: {classes[i][1]}")
+            self.class_list.insert(tk.END, f"{classes[i][0]}: {classes[i][1]} - {classes[i][3]:>10}")
 
         # Place the entire frame on canvas
-        self.canvas.create_window(300, 245, window=self.class_list_frame)
+        self.canvas.create_window(512, 280, window=self.class_list_frame)
 
 
 if __name__ == "__main__":

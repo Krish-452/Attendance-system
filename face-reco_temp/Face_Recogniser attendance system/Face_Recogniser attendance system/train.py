@@ -24,11 +24,11 @@ class FaceRecognitionApp:
         form_frame = tk.Frame(self.root, bg="#f0f0f0")
         form_frame.pack(pady=20)
 
-        tk.Label(form_frame, text="Employee ID", font=('Arial', 14)).grid(row=0, column=0, padx=10, pady=10, sticky=tk.E)
+        tk.Label(form_frame, text="Student ID", font=('Arial', 14)).grid(row=0, column=0, padx=10, pady=10, sticky=tk.E)
         self.emp_id_entry = tk.Entry(form_frame, font=('Arial', 14))
         self.emp_id_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        tk.Label(form_frame, text="Employee Name", font=('Arial', 14)).grid(row=1, column=0, padx=10, pady=10, sticky=tk.E)
+        tk.Label(form_frame, text="Student Name", font=('Arial', 14)).grid(row=1, column=0, padx=10, pady=10, sticky=tk.E)
         self.emp_name_entry = tk.Entry(form_frame, font=('Arial', 14))
         self.emp_name_entry.grid(row=1, column=1, padx=10, pady=10)
 
