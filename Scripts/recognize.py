@@ -1,248 +1,115 @@
-# main.py
-from typing import Dict, Optional
 import tkinter as tk
 from tkinter import messagebox
-import Utils.account_manager as account_manager
-
-#Declaring colours and fonts for multiple uses
-BG_ROOT = "#72BF6A"
-CANVAS_BG = "#8BFF84"
-PANEL_FILL = "white"
-PANEL_HEADER = "#72BF6A"
-BUTTON_BG = "#46923C"
-BUTTON_ACTIVE = "#276221"
-ENTRY_BG = "#ACD8A7"
-FONT_HEADER = ("Arial", 20, "bold")
-FONT_TITLE = ("Arial", 30, "bold")
-FONT_BUTTON = ("Arial", 14, "bold")
-FONT_SMALL = ("Arial", 12)
-
-#Ghost test for username and password fields
-def add_placeholder(entry: tk.Entry, placeholder: str, color: str = "grey") -> None:
-    def on_focus_in(event: tk.Event) -> None:
-        if entry.get() == placeholder:
-            entry.delete(0, tk.END)
-            entry.config(fg="black")
-
-    def on_focus_out(event: tk.Event) -> None:
-        if not entry.get():
-            entry.insert(0, placeholder)
-            entry.config(fg=color)
-
-    entry.insert(0, placeholder)
-    entry.config(fg=color)
-    entry.bind("<FocusIn>", on_focus_in)
-    entry.bind("<FocusOut>", on_focus_out)
-
-#Defining the main app as a class
-class App(tk.Tk):
-    def __init__(self) -> None:
-        super().__init__()
-        self.title("Attendance System")
-        self.geometry("600x600")
-        self.configure(bg=BG_ROOT)
-        self.resizable(False, False)
-
-        # container for pages
-        container = tk.Frame(self, bg=BG_ROOT)
-        container.pack(fill="both", expand=True)
-
-        # store pages
-        self.frames: Dict[str, tk.Frame] = {}
-        self.current_user_type: Optional[str] = None
-        self.current_username: Optional[str] = None
-
-        #Page list for switching frames
-        for P in (
-            HomePage,
-            LoginPage,
-            CreateAccountPage,
-            AdminDashboard,
-            ProfessorDashboard,
-            TADashboard,
-        ):
-            page_name = P.__name__
-            frame = P(parent=container, controller=self)
-            self.frames[page_name] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        header = tk.Label(self, text="Attendance System", font=FONT_TITLE, bg=BG_ROOT, fg="white")
-        header.pack(pady=(0, 10))
-
-        self.show_frame("HomePage") #Starting on the HomePage
-
-    def show_frame(self, page_name: str) -> None:
-        frame = self.frames[page_name] #To switch between pages using the predefined list above
-        frame.tkraise()
-
-    def show_login_for(self, user_type: str) -> None:
-        self.current_user_type = user_type #As the program uses a common login page, we must define the user for different logins
-        login_page: LoginPage = self.frames["LoginPage"]  # type: ignore
-        login_page.set_user_type(user_type)
-        self.show_frame("LoginPage")
-
-    def on_login_success(self, username: str, user_type: str) -> None: #Different dashboards for different users
-        self.current_username = username
-        if user_type == "admin":
-            self.show_frame("AdminDashboard")
-        elif user_type == "prof":
-            self.show_frame("ProfessorDashboard")
-        else:
-            self.show_frame("TADashboard")
-
-#We used a canvas styled on a frame
-#Canvas allows better customization
-#While the frame allows for seamless transitions
-class StyledCanvasFrame(tk.Frame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, bg=BG_ROOT)
-        self.controller = controller
-        self.canvas = tk.Canvas(self, width=600, height=520, bg=CANVAS_BG, highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
-        self.canvas.create_rectangle(150, 70, 450, 470, fill=PANEL_FILL, outline="")
-        self.canvas.create_rectangle(150, 70, 450, 150, fill=PANEL_HEADER, outline="")
-
-    def place_title(self, text: str) -> None:
-        self.canvas.create_text(300, 110, text=text, font=FONT_HEADER)
-
-    def create_button_window(self, y: int, widget: tk.Widget) -> None:
-        self.canvas.create_window(300, y, window=widget)
-
-class HomePage(StyledCanvasFrame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self.place_title("Welcome")
-
-        login_prof = tk.Button(self, text="Login as Professor", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                               borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                               width=18, height=2, command=lambda: controller.show_login_for("prof"))
-        login_TA = tk.Button(self, text="Login as TA", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                             borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                             width=18, height=2, command=lambda: controller.show_login_for("TA"))
-        login_admin = tk.Button(self, text="Login as Admin", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                width=18, height=2, command=lambda: controller.show_login_for("admin"))
-        quit_button = tk.Button(self, text="Quit", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
-                                command=self.controller.quit)
-
-        self.create_button_window(210, login_prof)
-        self.create_button_window(290, login_TA)
-        self.create_button_window(370, login_admin)
-        self.create_button_window(440, quit_button) #X value is the center of the frame, so no need to define it
-
-class LoginPage(StyledCanvasFrame):
-    """Integrate show login page, set login type into login page itself"""
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self._user_type: Optional[str] = None
-        self.place_title("Login")
-
-        self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
-        add_placeholder(self.username_entry, "👤 Username")
-        self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
-        add_placeholder(self.password_entry, "🔑 Password")
-
-        self.login_button = tk.Button(self, text="Login", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                      borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                      width=18, height=2, command=self._attempt_login)
-        self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
-                                     command=lambda: controller.show_frame("HomePage"))
-
-        self.create_button_window(210, self.username_entry)
-        self.create_button_window(270, self.password_entry)
-        self.create_button_window(360, self.login_button)
-        self.create_button_window(430, self.back_button)
-
-    def set_user_type(self, user_type: str) -> None:
-        self._user_type = user_type
-
-        display = {"prof": "Login (Professor)", "TA": "Login (TA)", "admin": "Login (Admin)"}
-        self.canvas.create_rectangle(150, 70, 450, 150, fill=PANEL_HEADER, outline="")
-        self.canvas.create_text(300, 110, text=display.get(user_type, "Login"), font=FONT_HEADER)
-
-    def _attempt_login(self) -> None:
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-        user_type = self._user_type or "prof"
-
-        """Clear username and password field after logging in or when pressing back button(Security risk)"""
-
-        if account_manager.login(username, password, user_type):
-            self.controller.on_login_success(username, user_type)
-            messagebox.showinfo("Login Successful", "You have logged in Successfully")
-        else:
-            messagebox.showerror("Login Failed", "Invalid Username or Password")
+import cv2
+import os
+import pandas as pd
+import datetime
+import time
 
 
-class CreateAccountPage(StyledCanvasFrame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self.place_title("Create Account")
+class FaceAttendanceApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Face Recogniser - Attendance Tracker")
+        self.root.geometry('1024x720')
+        self.root.configure(bg="#f0f0f0")
 
-        """Add radio button to select if they want to create a professor account or TA account. also add a label warning if the field is not selected (unpack and pack label)"""
+        self.setup_ui()
 
-        self.username_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
-        add_placeholder(self.username_entry, "👤 Username")
-        self.password_entry = tk.Entry(self, width=18, font=("Arial", 18, "bold"), bg=ENTRY_BG)
-        add_placeholder(self.password_entry, "🔑 Password")
+    def setup_ui(self):
+        tk.Label(self.root, text="Face Recognition Attendance System", font=('Arial', 25, 'bold'), bg="#282c34",
+                 fg="white", pady=20).pack(fill=tk.X)
 
-        self.create_button = tk.Button(self, text="Create Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                       width=18, height=2, command=self._attempt_create)
-        self.back_button = tk.Button(self, text="← Back", font=FONT_SMALL, bg=CANVAS_BG, fg="white", borderwidth=0,
-                                     command=lambda: controller.show_frame("AdminDashboard"))
-
-        self.create_button_window(210, self.username_entry)
-        self.create_button_window(270, self.password_entry)
-        self.create_button_window(360, self.create_button)
-        self.create_button_window(430, self.back_button)
+        btn_frame = tk.Frame(self.root, bg="#f0f0f0")
+        btn_frame.pack(pady=100)
 
 
-    def _attempt_create(self) -> None:
-        username = self.username_entry.get()
-        password = self.password_entry.get()
-
-        if account_manager.create_account(username, password):
-            messagebox.showinfo("Account created", "Account created successfully.")
-            self.controller.show_frame("AdminDashboard")
-        else:
-            messagebox.showwarning("Account Creation failed", "Account could not be created, please try again.")
+        tk.Button(btn_frame, text="Track Attendance", font=('Arial', 18, 'bold'), command=self.track_images,
+                  bg="#000000", fg="white", padx=30, pady=15).pack(side=tk.LEFT, padx=50)
 
 
-class AdminDashboard(StyledCanvasFrame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self.place_title("Admin Dashboard")
+    def is_number(self, s):
+        return True
 
-        """Add Delete account option"""
+    def take_images(self):
+        messagebox.showinfo("Info", "Registration/Capture is handled in the 'register_train.py' file.")
 
-        create_account_btn = tk.Button(self, text="Create Account", font=FONT_BUTTON, bg=BUTTON_BG, fg="white",
-                                       borderwidth=0, activebackground=BUTTON_ACTIVE, activeforeground="white",
-                                       width=18, height=2, command=lambda: controller.show_frame("CreateAccountPage"))
-        logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
-                               command=lambda: controller.show_frame("HomePage"))
+    def train_images(self):
+        messagebox.showinfo("Info", "Training is handled in the 'register_train.py' file.")
 
-        self.create_button_window(300, create_account_btn)
-        self.create_button_window(360, logout_btn)
+    def get_images_and_labels(self, path):
+        messagebox.showinfo("Error", "This method should not be called in this file.")
+        return [], []
 
-class ProfessorDashboard(StyledCanvasFrame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self.place_title("Professor Dashboard")
+    def track_images(self):
+        try:
 
-        logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
-                               command=lambda: controller.show_frame("HomePage"))
-        self.create_button_window(300, logout_btn)
+            if not os.path.exists("TrainingImageLabel/Trainer.yml"):
+                messagebox.showerror("Error",
+                                     "Trainer.yml not found. Please train images in 'register_train.py' first.")
+                return
+            if not os.path.exists("EmployeeDetails/EmployeeDetails.csv"):
+                messagebox.showerror("Error",
+                                     "EmployeeDetails.csv not found. Please capture images in 'register_train.py' first.")
+                return
 
-class TADashboard(StyledCanvasFrame):
-    def __init__(self, parent: tk.Widget, controller: App) -> None:
-        super().__init__(parent, controller)
-        self.place_title("TA Dashboard")
+            recognizer = cv2.face.LBPHFaceRecognizer_create()
+            recognizer.read("TrainingImageLabel/Trainer.yml")
+            faceCascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+            df = pd.read_csv("EmployeeDetails/EmployeeDetails.csv", header=None, names=["Id", "Name"])
+            cam = cv2.VideoCapture(0)
+            font = cv2.FONT_HERSHEY_SIMPLEX
 
-        logout_btn = tk.Button(self, text="Logout", font=FONT_SMALL, bg=BG_ROOT, fg="white", borderwidth=0,
-                               command=lambda: controller.show_frame("HomePage"))
-        self.create_button_window(300, logout_btn)
+            attendance = pd.DataFrame(columns=['Id', 'Name', 'Date', 'Time'])
+
+            while True:
+                ret, im = cam.read()
+                gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+                faces = faceCascade.detectMultiScale(gray, 1.2, 5)
+
+                for (x, y, w, h) in faces:
+                    Id, conf = recognizer.predict(gray[y:y + h, x:x + w])
+
+                    if conf < 50:
+                        ts = time.time()
+                        date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+                        timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+
+                        name_data = df[df['Id'] == Id]
+
+                        if not name_data.empty:
+                            name = name_data['Name'].values[0]
+                            label = f"{Id} - {name} (Present)"
+                            # Log attendance
+                            attendance.loc[len(attendance)] = [Id, name, date, timeStamp]
+                        else:
+                            label = f"{Id} - Unknown (No Record)"
+                    else:
+                        label = "Unknown"
+
+                    cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.putText(im, label, (x, y - 10), font, 0.75, (0, 255, 0), 2)
+
+                cv2.imshow('Tracking Attendance', im)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+
+            cam.release()
+            cv2.destroyAllWindows()
+
+            # Save attendance log
+            attendance.drop_duplicates(subset=['Id'], inplace=True)
+            os.makedirs("Attendance", exist_ok=True)
+            filename = f"Attendance/Attendance_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            attendance.to_csv(filename, index=False)
+            messagebox.showinfo("Attendance Saved", f"Attendance saved to {filename}")
+
+        except Exception as e:
+            messagebox.showerror("Error",
+                                 f"Attendance tracking failed. Ensure files exist and camera works. Error: {e}")
+
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    root = tk.Tk()
+    app = FaceAttendanceApp(root)
+    root.mainloop()
