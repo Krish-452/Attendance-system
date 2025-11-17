@@ -1,2 +1,3 @@
 python-csv
 tk-tools
+opencv-contrib-python
