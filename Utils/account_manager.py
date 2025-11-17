@@ -39,7 +39,7 @@ Password must Contain at least one special character""")
 
     if valid_username == True and valid_password == True:
         try:
-            with open(file_path(acc_type), 'a') as login_data: #storing username and password
+            with open(file_path(acc_type), 'a', newline='') as login_data: #storing username and password
                 csv.writer(login_data).writerow([username, password])
                 """Hash password before saving"""
                 return True
@@ -55,7 +55,7 @@ def login(username: str,password: str,acc_type: str) -> bool:
                 return True
         return False
 
-def retrieve_accounts(acc_type:str) -> list:
+def retrieve_accounts(acc_type: str) -> list:
     with open(file_path(acc_type), 'r') as login_data:
         return [row[0] for row in csv.reader(login_data)]
 
